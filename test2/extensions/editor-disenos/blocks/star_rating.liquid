@@ -135,19 +135,16 @@
       intentos++;
       mostrarZona('loader');
 
-      // Por ahora simulamos la IA con un timeout
-      // Aquí irá la llamada real a tu backend
       setTimeout(function() {
         var urlFoto = URL.createObjectURL(foto);
         imagenResultado.src = urlFoto;
         mostrarZona('resultado');
 
-        // Reemplazar la imagen principal del producto
         var contenedorImagen = document.querySelector('.product__media-wrapper');
         if (contenedorImagen) {
           contenedorImagen.innerHTML = '<img src="' + urlFoto + '" style="width:100%;height:auto;border-radius:8px;" />';
         }
-      }, 2000);
+
         if (intentos >= MAX_INTENTOS) {
           botonReintentar.style.display = 'none';
         }
