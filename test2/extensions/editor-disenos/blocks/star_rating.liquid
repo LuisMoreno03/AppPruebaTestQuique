@@ -29,7 +29,7 @@
         🔄 Intentar de nuevo
       </button>
       <button id="boton-confirmar-{{ block.id }}" class="boton-principal">
-        ✅ Me gusta, agregar al carrito
+        ✅ Diseño confirmado
       </button>
     </div>
   </div>
@@ -142,7 +142,10 @@
 
         var contenedorImagen = document.querySelector('.product__media-wrapper');
         if (contenedorImagen) {
-          contenedorImagen.innerHTML = '<img src="' + urlFoto + '" style="width:100%;height:auto;border-radius:8px;" />';
+          var imgOriginal = contenedorImagen.querySelector('img');
+          var anchura = imgOriginal ? imgOriginal.clientWidth + 'px' : '100%';
+          var altura = imgOriginal ? imgOriginal.clientHeight + 'px' : 'auto';
+          contenedorImagen.innerHTML = '<img src="' + urlFoto + '" style="width:' + anchura + ';height:' + altura + ';object-fit:cover;border-radius:8px;" />';
         }
 
         if (intentos >= MAX_INTENTOS) {
