@@ -1,21 +1,180 @@
-{% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
-<span style="color:{{ block.settings.colour }}">
-  {% render 'stars', rating: avg_rating %}
-</span>
-{% if avg_rating >= 4 %}
-  <br>
-  <img src="{{ "thumbs-up.png" | asset_img_url: '15x' }}" height="15" width="15" loading="lazy">
-  {{ 'ratings.home.recommendationText' | t }}
-{% endif %}
+<div id="editor-cuadros-{{ block.id }}" class="editor-container">
+
+  <!-- PASO 1: Zona de upload -->
+  <div id="zona-upload-{{ block.id }}" class="zona-upload">
+    <h3>{{ block.settings.titulo_editor }}</h3>
+    <p>Sube tu foto y ve el resultado en segundos ✨</p>
+    <label for="input-foto-{{ block.id }}" class="boton-upload">
+      📷 Subir mi foto
+    </label>
+    <input
+      type="file"
+      id="input-foto-{{ block.id }}"
+      accept="image/*"
+      style="display:none"
+    />
+  </div>
+
+  <!-- PASO 2: Loader mientras la IA procesa -->
+  <div id="zona-loader-{{ block.id }}" class="zona-loader" style="display:none">
+    <div class="loader-spinner"></div>
+    <p>Generando tu diseño con IA... ✨</p>
+  </div>
+
+  <!-- PASO 3: Resultado -->
+  <div id="zona-resultado-{{ block.id }}" class="zona-resultado" style="display:none">
+    <img id="imagen-resultado-{{ block.id }}" src="" alt="Tu diseño personalizado" style="max-width:100%" />
+    <div class="botones-resultado">
+      <button id="boton-reintentar-{{ block.id }}" class="boton-secundario">
+        🔄 Intentar de nuevo
+      </button>
+      <button id="boton-confirmar-{{ block.id }}" class="boton-principal">
+        ✅ Me gusta, agregar al carrito
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .editor-container {
+    padding: 20px;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  .boton-upload {
+    display: inline-block;
+    padding: 12px 24px;
+    background: {{ block.settings.color_boton }};
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 12px;
+  }
+  .loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .botones-resultado {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .boton-principal {
+    padding: 12px 24px;
+    background: #000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .boton-secundario {
+    padding: 12px 24px;
+    background: white;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+</style>
+
+<script>
+  (function() {
+    var blockId = '{{ block.id }}';
+    var inputFoto     = document.getElementById('input-foto-' + blockId);
+    var zonaUpload    = document.getElementById('zona-upload-' + blockId);
+    var zonaLoader    = document.getElementById('zona-loader-' + blockId);
+    var zonaResultado = document.getElementById('zona-resultado-' + blockId);
+    var imagenResultado  = document.getElementById('imagen-resultado-' + blockId);
+    var botonReintentar  = document.getElementById('boton-reintentar-' + blockId);
+    var botonConfirmar   = document.getElementById('boton-confirmar-' + blockId);
+
+    var intentos = 0;
+    var MAX_INTENTOS = 3;
+
+    function mostrarZona(zona) {
+      zonaUpload.style.display    = zona === 'upload'    ? 'block' : 'none';
+      zonaLoader.style.display    = zona === 'loader'    ? 'block' : 'none';
+      zonaResultado.style.display = zona === 'resultado' ? 'block' : 'none';
+    }
+
+    function convertirABase64(archivo) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload  = function() { resolve(reader.result.split(',')[1]); };
+        reader.onerror = function() { reject(new Error('Error leyendo archivo')); };
+        reader.readAsDataURL(archivo);
+      });
+    }
+
+    inputFoto.addEventListener('change', function(e) {
+      var foto = e.target.files[0];
+      if (!foto || !foto.type.startsWith('image/')) {
+        alert('Por favor selecciona una imagen válida');
+        return;
+      }
+      if (foto.size > 10 * 1024 * 1024) {
+        alert('La imagen es demasiado grande. Máximo 10MB');
+        return;
+      }
+      intentos++;
+      mostrarZona('loader');
+
+      // Por ahora simulamos la IA con un timeout
+      // Aquí irá la llamada real a tu backend
+      setTimeout(function() {
+        imagenResultado.src = URL.createObjectURL(foto);
+        mostrarZona('resultado');
+        if (intentos >= MAX_INTENTOS) {
+          botonReintentar.style.display = 'none';
+        }
+      }, 2000);
+    });
+
+    botonReintentar.addEventListener('click', function() {
+      mostrarZona('upload');
+      inputFoto.value = '';
+    });
+
+    botonConfirmar.addEventListener('click', function() {
+      alert('¡Diseño confirmado! Aquí irá la integración con el carrito.');
+    });
+
+  })();
+</script>
 
 {% schema %}
 {
-  "name": "Star Rating",
+  "name": "Editor de Diseños IA",
   "target": "section",
   "settings": [
-    { "type": "product", "id": "product", "label": "product", "autofill": true },
-    { "type": "color", "id": "colour", "label": "Star Colour", "default": "#ff0000" }
+    {
+      "type": "text",
+      "id": "titulo_editor",
+      "label": "Título del editor",
+      "default": "Personaliza tu cuadro"
+    },
+    {
+      "type": "color",
+      "id": "color_boton",
+      "label": "Color del botón",
+      "default": "#000000"
+    }
   ]
 }
 {% endschema %}
-
