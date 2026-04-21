@@ -17,13 +17,16 @@
 
   <!-- PASO 2: Loader mientras la IA procesa -->
   <div id="zona-loader-{{ block.id }}" class="zona-loader" style="display:none">
-    <div class="loader-spinner"></div>
-    <p>Generando tu diseño con IA... ✨</p>
+  <p>Generando tu diseño con IA... ✨</p>
+  <div class="barra-contenedor">
+    <div id="barra-progreso-{{ block.id }}" class="barra-progreso"></div>
   </div>
+  <p id="texto-progreso-{{ block.id }}" class="texto-progreso">0%</p>
+</div>
 
   <!-- PASO 3: Resultado -->
   <div id="zona-resultado-{{ block.id }}" class="zona-resultado" style="display:none">
-    <img id="imagen-resultado-{{ block.id }}" src="" alt="Tu diseño personalizado" style="max-width:100%" />
+    <img id="imagen-resultado-{{ block.id }}" src="" alt="Tu diseño personalizado" style="display:none" />
     <div class="botones-resultado">
       <button id="boton-reintentar-{{ block.id }}" class="boton-secundario">
         🔄 Intentar de nuevo
@@ -54,18 +57,25 @@
     font-size: 16px;
     margin-top: 12px;
   }
-  .loader-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #333;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
+    .barra-contenedor {
+    width: 100%;
+    background: #f0f0f0;
+    border-radius: 20px;
+    height: 12px;
+    margin: 16px 0 8px 0;
+    overflow: hidden;
   }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  .barra-progreso {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #000, #555);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+  }
+  .texto-progreso {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
   }
   .botones-resultado {
     display: flex;
@@ -132,10 +142,34 @@
         alert('La imagen es demasiado grande. Máximo 10MB');
         return;
       }
-      intentos++;
+            intentos++;
       mostrarZona('loader');
 
+      var barra = document.getElementById('barra-progreso-' + blockId);
+      var textoPorcentaje = document.getElementById('texto-progreso-' + blockId);
+      var progreso = 0;
+
+      var mensajes = [
+        'Analizando tu foto...',
+        'Aplicando el estilo IA...',
+        'Generando los detalles...',
+        'Casi listo...',
+        '¡Tu diseño está listo! ✨'
+      ];
+
+      var intervalo = setInterval(function() {
+        var incremento = progreso < 60 ? 8 : progreso < 85 ? 4 : 1;
+        progreso = Math.min(progreso + incremento, 95);
+        barra.style.width = progreso + '%';
+        textoPorcentaje.textContent = mensajes[Math.floor(progreso / 20)] || mensajes[4];
+      }, 150);
+
       setTimeout(function() {
+        clearInterval(intervalo);
+        barra.style.width = '100%';
+        textoPorcentaje.textContent = '¡Tu diseño está listo! ✨';
+
+        setTimeout(function() {
         var urlFoto = URL.createObjectURL(foto);
         imagenResultado.src = urlFoto;
         mostrarZona('resultado');
@@ -151,8 +185,10 @@
         if (intentos >= MAX_INTENTOS) {
           botonReintentar.style.display = 'none';
         }
+              }, 300);
       }, 2000);
     });
+
 
     botonReintentar.addEventListener('click', function() {
       mostrarZona('upload');
