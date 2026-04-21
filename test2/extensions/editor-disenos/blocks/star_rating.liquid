@@ -158,11 +158,11 @@
       ];
 
       var intervalo = setInterval(function() {
-        var incremento = progreso < 60 ? 8 : progreso < 85 ? 4 : 1;
+        var incremento = progreso < 60 ? 5 : progreso < 85 ? 2 : 0.5;
         progreso = Math.min(progreso + incremento, 95);
         barra.style.width = progreso + '%';
         textoPorcentaje.textContent = mensajes[Math.floor(progreso / 20)] || mensajes[4];
-      }, 150);
+      }, 100);
 
       setTimeout(function() {
         clearInterval(intervalo);
@@ -186,7 +186,7 @@
           botonReintentar.style.display = 'none';
         }
               }, 300);
-      }, 2000);
+      }, 3500;
     });
 
 
