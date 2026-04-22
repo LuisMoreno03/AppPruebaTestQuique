@@ -167,29 +167,45 @@
         textoPorcentaje.textContent = mensajes[Math.floor(progreso / 20)] || mensajes[4];
       }, 100);
 
-      setTimeout(function() {
+      // Enviar foto al servidor de IA
+      var formData = new FormData();
+      formData.append('imagen', foto);
+
+      fetch('http://187.77.96.150/api/generar-diseno', {
+        method: 'POST',
+        body: formData
+      })
+      .then(function(respuesta) {
+        return respuesta.json();
+      })
+      .then(function(datos) {
         clearInterval(intervalo);
         barra.style.width = '100%';
         textoPorcentaje.textContent = '¡Tu diseño está listo! ✨';
 
         setTimeout(function() {
-        var urlFoto = URL.createObjectURL(foto);
-        imagenResultado.src = urlFoto;
-        mostrarZona('resultado');
+          imagenResultado.src = datos.imagen_url;
+          mostrarZona('resultado');
 
-        var contenedorImagen = document.querySelector('.product__media-wrapper');
-        if (contenedorImagen) {
-          var imgOriginal = contenedorImagen.querySelector('img');
-          var anchura = imgOriginal ? imgOriginal.clientWidth + 'px' : '100%';
-          var altura = imgOriginal ? imgOriginal.clientHeight + 'px' : 'auto';
-          contenedorImagen.innerHTML = '<img src="' + urlFoto + '" style="width:' + anchura + ';height:' + altura + ';object-fit:cover;border-radius:8px;" />';
-        }
+          var contenedorImagen = document.querySelector('.product__media-wrapper');
+          if (contenedorImagen) {
+            var imgOriginal = contenedorImagen.querySelector('img');
+            var anchura = imgOriginal ? imgOriginal.clientWidth + 'px' : '100%';
+            var altura = imgOriginal ? imgOriginal.clientHeight + 'px' : 'auto';
+            contenedorImagen.innerHTML = '<img src="' + datos.imagen_url + '" style="width:' + anchura + ';height:' + altura + ';object-fit:cover;border-radius:8px;" />';
+          }
 
-        if (intentos >= MAX_INTENTOS) {
-          botonReintentar.style.display = 'none';
-        }
-              }, 300);
-      }, 3500);
+          if (intentos >= MAX_INTENTOS) {
+            botonReintentar.style.display = 'none';
+          }
+        }, 300);
+      })
+      .catch(function(error) {
+        clearInterval(intervalo);
+        console.error('Error:', error);
+        mostrarZona('upload');
+        alert('Hubo un problema generando tu diseño. Por favor intenta de nuevo.');
+      });
     });
 
 
