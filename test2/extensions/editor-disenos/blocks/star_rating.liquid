@@ -148,6 +148,8 @@
       var barra = document.getElementById('barra-progreso-' + blockId);
       var textoPorcentaje = document.getElementById('texto-progreso-' + blockId);
       var progreso = 0;
+      barra.style.width = '0%';
+      barra.style.transition = 'none';
 
       var mensajes = [
         'Analizando tu foto...',
@@ -158,6 +160,7 @@
       ];
 
       var intervalo = setInterval(function() {
+        if (progreso === 0) barra.style.transition = 'width 0.4s ease';
         var incremento = progreso < 60 ? 5 : progreso < 85 ? 2 : 0.5;
         progreso = Math.min(progreso + incremento, 95);
         barra.style.width = progreso + '%';
